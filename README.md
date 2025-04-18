@@ -1,6 +1,6 @@
 # Sand_Cmulation
 
-A high-performance particle simulation system with advanced spatial partitioning.
+A high-performance particle simulation system with advanced spatial partitioning in C++.
 
 ## Overview
 
@@ -17,7 +17,7 @@ Sand_Cmulation is a CS50X final project that implements a particle-based sand si
 
 ## Current Status
 
-The project is currently in development. The grid system is visually functional, demonstrating the basic particle simulation capabilities. However, there is a known segmentation fault in the `resizeBuckets()` function in `src/spatial/SpatialHash.hpp` due to mutex lock issues. We're actively working on resolving this issue.
+The project is currently in development. The grid system is visually functional, demonstrating the basic particle simulation capabilities. However, there is a known segmentation fault in the `resizeBuckets()` function in `src/spatial/SpatialHash.hpp` due to mutex lock issues. I'm actively working on resolving this issue.
 
 ## Grid System
 
