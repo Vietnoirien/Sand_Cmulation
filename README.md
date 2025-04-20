@@ -17,7 +17,7 @@ Sand_Cmulation is a CS50X final project that implements a particle-based sand si
 
 ## Current Status
 
-The project is currently in development. The grid system is visually functional, demonstrating the basic particle simulation capabilities. However, there is a known segmentation fault in the `resizeBuckets()` function in `src/spatial/SpatialHash.hpp` due to mutex lock issues. I'm actively working on resolving this issue.
+The project is currently in development. The grid system is visually functional, demonstrating the basic particle simulation capabilities.
 
 ## Grid System
 
@@ -107,17 +107,12 @@ auto nearestParticles = connector.queryKNearest(pos, 10);
 - `getPeakMemoryUsage()`: Get peak memory usage
 - `getMemoryAllocationMap()`: Get detailed memory allocation map
 
-## Known Issues
-
-- **Segmentation Fault**: The `resizeBuckets()` function in `SpatialHash.hpp` has a mutex lock issue that will cause segmentation faults during bucket resizing. This occurs when the system attempts to resize the spatial hash buckets under heavy load.
-
 ## Current Interface
 
 The current user interface is minimal and designed primarily to visually verify that the grid system is working correctly. As this is a CS50X final project, the focus has been on implementing the core simulation functionality rather than a polished UI.
 
 ## Future Improvements
 
-- Fix the segmentation fault in the spatial hash resizing
 - Implement a more user-friendly interface
 - Add more particle types and interactions
 - Optimize memory usage for larger simulations
@@ -126,7 +121,7 @@ The current user interface is minimal and designed primarily to visually verify 
 ## Building the Project
 
 ```bash
-g++ -std=c++17 -o sand_simulation src/main.cpp src/app/SandSimulation.cpp src/ui/GridVisualizer.cpp -lSDL2 -fopenmp
+make
 ```
 
 ## Running the Simulation
