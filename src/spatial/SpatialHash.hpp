@@ -272,10 +272,15 @@ private:
             }
             
             // Replace old buckets and mutexes
+            std::vector<std::vector<ParticleRef>> old_buckets = std::move(buckets);
             buckets = std::move(new_buckets);
+
+            // Swap mutexes with new ones using a temporary variable
+            auto old_mutexes = std::move(bucket_mutexes);
             bucket_mutexes = std::move(new_mutexes);
             
             // Locks will be released when all_locks is destroyed
+            // old_mutexes will be destroyed when this function ends
         }
     }
 
