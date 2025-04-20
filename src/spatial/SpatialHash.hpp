@@ -213,6 +213,7 @@ private:
     }
     
     /** @brief Resizes bucket array with rehashing */
+    // Codi AI helped me a lot to debug this function
     void resizeBuckets() {
         // Lock the resize mutex for the entire operation
         std::lock_guard<std::mutex> resize_lock(resize_mutex);
