@@ -255,8 +255,8 @@ public:
                 uint32_t query_y = static_cast<uint32_t>(pos.y) + dy;
 
                 //skip if out of bounds
-                if (query_x >= static_cast<int>(spatial_hash.getWidth()) || 
-                    query_y >= static_cast<int>(spatial_hash.getHeight())) {
+                if (query_x >= static_cast<uint32_t>(spatial_hash.getWidth()) || 
+                    query_y >= static_cast<uint32_t>(spatial_hash.getHeight())) {
                     continue;
                 }
 

@@ -261,27 +261,34 @@ private:
             }
         }
         
-        // Now swap the buckets and mutexes atomically
-        {
-            // Lock all old buckets to ensure no ongoing operations
-            std::vector<std::unique_lock<std::mutex>> all_locks;
-            all_locks.reserve(buckets.size());
-            
-            for(size_t i = 0; i < buckets.size(); ++i) {
-                all_locks.emplace_back(bucket_mutexes[i]);
-            }
-            
-            // Replace old buckets and mutexes
-            std::vector<std::vector<ParticleRef>> old_buckets = std::move(buckets);
-            buckets = std::move(new_buckets);
-
-            // Swap mutexes with new ones using a temporary variable
-            auto old_mutexes = std::move(bucket_mutexes);
-            bucket_mutexes = std::move(new_mutexes);
-            
-            // Locks will be released when all_locks is destroyed
-            // old_mutexes will be destroyed when this function ends
+        // Now swap the buckets and mutexes atomically            
+        for(size_t i = 0; i < buckets.size(); ++i) {
+            bucket_mutexes[i].lock();
         }
+
+        try {
+            // Store old data in temporary variables
+            auto old_buckets = std::move(buckets);
+            auto old_mutexes = std::move(bucket_mutexes);
+            
+            // Swap buckets and mutexes
+            buckets = std::move(new_buckets);
+            bucket_mutexes = std::move(new_mutexes);
+
+            //Unlock all old mutexes
+            for(size_t i = 0; i < old_buckets.size(); ++i) {
+                old_mutexes[i].unlock();
+            }
+        }
+        catch(...) {
+            // If an exception occurs, unlock all mutexes
+            for(size_t i = 0; i < buckets.size(); ++i) {
+                bucket_mutexes[i].unlock();
+            }
+            throw; // Rethrow the exception
+        }
+        // Update timestamp to invalidate queries
+        current_timestamp++;
     }
 
 public:

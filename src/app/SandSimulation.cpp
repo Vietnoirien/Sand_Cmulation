@@ -71,11 +71,11 @@ void SandSimulation::update() {
             switch (p.type) {
                 case ParticleType::SAND:
                     // Try to move down
-                    if (y < height - 1 && connector->isEmpty(x, y + 1)) {
+                    if (y < static_cast<int>(height - 1) && connector->isEmpty(x, y + 1)) {
                         connector->moveParticle(x, y, x, y + 1);
                     }
                     // Try to move diagonally down
-                    else if (y < height - 1) {
+                    else if (y < static_cast<int>(height - 1)) {
                         bool movedLeft = false;
                         bool movedRight = false;
                         
@@ -96,11 +96,11 @@ void SandSimulation::update() {
                 case ParticleType::WATER:
                     // Water has more horizontal spread
                     // Try to move down
-                    if (y < height - 1 && connector->isEmpty(x, y + 1)) {
+                    if (y < static_cast<int>(height - 1) && connector->isEmpty(x, y + 1)) {
                         connector->moveParticle(x, y, x, y + 1);
                     }
                     // Try to move diagonally down
-                    else if (y < height - 1) {
+                    else if (y < static_cast<int>(height - 1)) {
                         bool moved = false;
                         
                         // Try left diagonal
