@@ -177,14 +177,12 @@ public:
             return;  // Invalid position
         }
 
-        std::cout << "Adding particle at (" << x << ", " << y << ")" << std::endl;
         gridOps.updateCell(x, y, p);
         ParticleRef ref(&grid, x, y);
         spatialHash.insert(ref, x, y);
     }
 
     bool removeParticle(uint32_t x, uint32_t y) {
-        std::cout << "Removing particle at (" << x << ", " << y << ")" << std::endl;
         ParticleRef ref(&grid, x, y);
         spatialHash.remove(ref, x, y);
         Particle emptyParticle;

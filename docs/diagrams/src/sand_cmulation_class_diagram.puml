@@ -1,0 +1,162 @@
+@startuml Sand_Cmulation Class Hierarchy
+
+' Main classes with more details from the source code
+class Grid {
+  - width: uint32_t
+  - height: uint32_t
+  - dirty_tracker: DirtyTracker
+  + at(x: uint32_t, y: uint32_t): Particle&
+  + isValidPosition(x: uint32_t, y: uint32_t): bool
+  + getWidth(): uint32_t
+  + getHeight(): uint32_t
+  + markDirty(x: uint32_t, y: uint32_t): void
+  + forEachCell(callback): void
+  + forEachDirtyCell(callback): void
+  + clearAllDirty(): void
+  .. Iterator Support ..
+  + GridIterator<DirtyOnly>: inner class
+}
+
+class SpatialHash {
+  + insert(ref: ParticleRef, x: uint32_t, y: uint32_t): void
+  + remove(ref: ParticleRef, x: uint32_t, y: uint32_t): void
+}
+
+class GridSpatialConnector {
+  - grid: Grid&
+  - spatialHash: SpatialHash&
+  - querySystem: QuerySystem
+  - gridOps: GridOperations
+  - memory_tracker: std::unique_ptr<MemoryTracker>
+  - metrics: UpdateMetrics
+  - BATCH_SIZE: size_t = 1024
+  .. Particle Operations ..
+  + addParticle(x: uint32_t, y: uint32_t, p: Particle): void
+  + removeParticle(x: uint32_t, y: uint32_t): bool
+  + moveParticle(fromX: uint32_t, fromY: uint32_t, toX: uint32_t, toY: uint32_t): bool
+  + getNeighbors(x: uint32_t, y: uint32_t): std::vector<std::pair<uint32_t, uint32_t>>
+  .. Grid State Queries ..
+  + isValidPosition(x: uint32_t, y: uint32_t): bool
+  + isEmpty(x: uint32_t, y: uint32_t): bool
+  + getWidth(): uint32_t
+  + getHeight(): uint32_t
+  + getParticle(x: uint32_t, y: uint32_t): Particle&
+  .. Grid Operations ..
+  + clear(): void
+  + update(): void
+  + batchSyncDirtyStates(): void
+  .. Advanced Spatial Queries ..
+  + queryRadius(pos: Vector2D, radius: float): std::vector<ParticleRef>
+  + queryBox(min: Vector2D, max: Vector2D): std::vector<ParticleRef>
+  + queryKNearest(pos: Vector2D, k: size_t): std::vector<ParticleRef>
+  + queryDenseRegions(min_density: float): std::vector<ParticleRef>
+  + queryRadiusFiltered<FilterFunc>(pos: Vector2D, radius: float, filter: FilterFunc): std::vector<ParticleRef>
+  + queryArea(x: uint32_t, y: uint32_t): std::vector<ParticleRef>
+  .. Memory Management ..
+  + getCurrentMemoryUsage(): size_t
+  + getPeakMemoryUsage(): size_t
+  + getMemoryAllocationMap(): std::unordered_map<std::string, size_t>
+  + getMetrics(): UpdateMetrics
+  + resetMetrics(): void
+  - processBatch(updates): void
+  - updateMetrics(start_time): void
+  - calculateMemoryUsage(): size_t
+}
+
+class QuerySystem {
+  + queryRadius(pos: Vector2D, radius: float): std::vector<ParticleRef>
+  + queryBox(min: Vector2D, max: Vector2D): std::vector<ParticleRef>
+  + queryKNearest(pos: Vector2D, k: size_t): std::vector<ParticleRef>
+  + queryDenseRegions(min_density: float): std::vector<ParticleRef>
+  + queryRadiusFiltered<FilterFunc>(pos: Vector2D, radius: float, filter: FilterFunc): std::vector<ParticleRef>
+}
+
+class GridOperations {
+  - grid: Grid&
+  - moveCallback: std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)>
+  + moveParticle(fromX: uint32_t, fromY: uint32_t, toX: uint32_t, toY: uint32_t): bool
+  + updateCell(x: uint32_t, y: uint32_t, p: Particle): void
+  + getNeighbors(x: uint32_t, y: uint32_t): std::vector<std::pair<uint32_t, uint32_t>>
+  + setMoveCallback(callback): void
+}
+
+class Particle {
+  + isEmpty(): bool
+}
+
+class ParticleRef {
+  - grid: Grid*
+  - x: uint32_t
+  - y: uint32_t
+  + getParticle(): Particle&
+}
+
+class Vector2D {
+  + x: float
+  + y: float
+}
+
+class MemoryTracker<T> {
+  - component_name: std::string
+  - allocation_size: size_t
+  + getCurrentUsage(): size_t
+  + getPeakUsage(): size_t
+  + getAllocationMap(): std::unordered_map<std::string, size_t>
+}
+
+class MemoryMonitor {
+  + getInstance(): MemoryMonitor&
+  + getCurrentUsage(): size_t
+  + getPeakUsage(): size_t
+  + getAllocationMap(): std::unordered_map<std::string, size_t>
+}
+
+class DirtyTracker {
+  - dirty_indices: std::unordered_set<uint32_t>
+  + markDirty(index: uint32_t): void
+  + clearAllDirty(): void
+  + getDirtyIndices(): const std::unordered_set<uint32_t>&
+}
+
+class UpdateMetrics {
+  + updates_processed: uint64_t
+  + avg_sync_time: double
+  + peak_batch_size: size_t
+  + total_sync_time: std::chrono::microseconds
+}
+
+' Additional relationships from the code
+Grid *-- DirtyTracker
+GridSpatialConnector *-- UpdateMetrics
+GridOperations --> "callback" GridSpatialConnector : "Movement sync"
+
+' Existing relationships
+GridSpatialConnector o-- Grid
+GridSpatialConnector o-- SpatialHash
+GridSpatialConnector *-- QuerySystem
+GridSpatialConnector *-- GridOperations
+GridSpatialConnector *-- "MemoryTracker<GridSpatialConnector>"
+
+GridOperations o-- Grid
+QuerySystem o-- SpatialHash
+
+Grid *-- "many" Particle
+ParticleRef o-- Grid
+ParticleRef o-- Particle
+
+MemoryTracker ..> MemoryMonitor
+
+note top of GridSpatialConnector
+  Performance Metrics:
+  - Insertion: ~613k particles/second
+  - Queries: ~49k queries/second
+  - Batch sync: ~2.4M updates/second
+  - Movement: ~79k moves/second
+end note
+
+note right of GridSpatialConnector::batchSyncDirtyStates
+  Uses OpenMP for parallel processing
+  of particle updates in batches
+end note
+
+@enduml
