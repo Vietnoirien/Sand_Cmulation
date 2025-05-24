@@ -4,7 +4,7 @@ A high-performance particle simulation system with advanced spatial partitioning
 
 ## Overview
 
-Sand_Cmulation is a CS50X final project that implements a particle-based sand simulation with efficient spatial queries and grid operations. The system uses a combination of grid-based storage and spatial hashing to achieve high-performance particle operations.
+Sand_Cmulation is a project that implements a particle-based sand simulation with efficient spatial queries and grid operations. The system uses a combination of grid-based storage and spatial hashing to achieve high-performance particle operations.
 
 ## Features
 
@@ -109,7 +109,7 @@ auto nearestParticles = connector.queryKNearest(pos, 10);
 
 ## Current Interface
 
-The current user interface is minimal and designed primarily to visually verify that the grid system is working correctly. As this is a CS50X final project, the focus has been on implementing the core simulation functionality rather than a polished UI.
+The current user interface is minimal and designed primarily to visually verify that the grid system is working correctly. As this was a CS50X final project idea, the focus has been on implementing the core simulation functionality rather than a polished UI.
 
 ## Future Improvements
 
